@@ -54,8 +54,8 @@ function Sky({ stars }) {
 
   // Fixed position in top left corner
   const celestialPosition = {
-    x: 10,  // Changed from 50 to 10 (closer to left edge)
-    y: 15   // Changed from 25 to 15 (closer to top edge)
+    x: 10,  // 10% from left
+    y: 15   // 15% from top
   };
 
   return (
@@ -107,13 +107,13 @@ function Sky({ stars }) {
         sx={{
           position: 'absolute',
           left: `${celestialPosition.x}%`,
-          top: `${celestialPosition.y}%`,
+          top: isNight ? '150%' : `${celestialPosition.y}%`, // Move below view when night
           width: '50px',
           height: '50px',
           borderRadius: '50%',
           bgcolor: '#ffeb3b',
           boxShadow: '0 0 40px #ffeb3b',
-          transition: 'opacity 0.5s ease-in-out',
+          transition: 'top 2s ease-in-out, opacity 0.5s ease-in-out',
           transform: 'scale(1)',
           zIndex: 1,
           opacity: !isNight ? 1 : 0
@@ -124,13 +124,13 @@ function Sky({ stars }) {
         sx={{
           position: 'absolute',
           left: `${celestialPosition.x}%`,
-          top: `${celestialPosition.y}%`,
+          top: isNight ? `${celestialPosition.y}%` : '150%', // Move below view when day
           width: '50px',
           height: '50px',
           borderRadius: '50%',
           bgcolor: '#ffffff',
           boxShadow: '0 0 20px #ffffff80',
-          transition: 'opacity 0.5s ease-in-out',
+          transition: 'top 2s ease-in-out, opacity 0.5s ease-in-out',
           transform: 'scale(0.8)',
           zIndex: 1,
           opacity: isNight ? 1 : 0
