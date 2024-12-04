@@ -1,61 +1,62 @@
-import React, { useEffect, useState } from 'react';
-import { Box } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Switch, styled } from '@mui/material';
 
-function Sky({ isNight, stars }) {
-  const [sunPosition, setSunPosition] = useState({ x: -10, y: 100 });
-  const [moonPosition, setMoonPosition] = useState({ x: -10, y: 100 });
-  const [prevIsNight, setPrevIsNight] = useState(isNight);
-  const [moonStartTime, setMoonStartTime] = useState(Date.now());
+// Custom styled switch for day/night toggle
+const DayNightSwitch = styled(Switch)(({ theme }) => ({
+  width: 62,
+  height: 34,
+  padding: 7,
+  '& .MuiSwitch-switchBase': {
+    margin: 1,
+    padding: 0,
+    transform: 'translateX(6px)',
+    '&.Mui-checked': {
+      color: '#fff',
+      transform: 'translateX(22px)',
+      '& .MuiSwitch-thumb:before': {
+        backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><path fill="${encodeURIComponent(
+          '#fff',
+        )}" d="M4.2 2.5l-.7 1.8-1.8.7 1.8.7.7 1.8.6-1.8L6.7 5l-1.9-.7-.6-1.8zm15 8.3a6.7 6.7 0 11-6.6-6.6 5.8 5.8 0 006.6 6.6z"/></svg>')`,
+      },
+      '& + .MuiSwitch-track': {
+        opacity: 1,
+        backgroundColor: '#8796A5',
+      },
+    },
+  },
+  '& .MuiSwitch-thumb': {
+    backgroundColor: '#003892',
+    width: 32,
+    height: 32,
+    '&:before': {
+      content: "''",
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+      left: 0,
+      top: 0,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><path fill="${encodeURIComponent(
+        '#fff',
+      )}" d="M9.305 1.667V3.75h1.389V1.667h-1.39zm-4.707 1.95l-.982.982L5.09 6.072l.982-.982-1.473-1.473zm10.802 0L13.927 5.09l.982.982 1.473-1.473-.982-.982zM10 5.139a4.872 4.872 0 00-4.862 4.86A4.872 4.872 0 0010 14.862 4.872 4.872 0 0014.86 10 4.872 4.872 0 0010 5.139zm0 1.389A3.462 3.462 0 0113.471 10a3.462 3.462 0 01-3.473 3.472A3.462 3.462 0 016.527 10 3.462 3.462 0 0110 6.528zM1.665 9.305v1.39h2.083v-1.39H1.666zm14.583 0v1.39h2.084v-1.39h-2.084zM5.09 13.928L3.616 15.4l.982.982 1.473-1.473-.982-.982zm9.82 0l-.982.982 1.473 1.473.982-.982-1.473-1.473zM9.305 16.25v2.083h1.389V16.25h-1.39z"/></svg>')`,
+    },
+  },
+  '& .MuiSwitch-track': {
+    opacity: 1,
+    backgroundColor: '#8796A5',
+    borderRadius: 20 / 2,
+  },
+}));
 
-  useEffect(() => {
-    // Reset moon animation when night begins
-    if (isNight && !prevIsNight) {
-      setMoonStartTime(Date.now());
-    }
-    setPrevIsNight(isNight);
-  }, [isNight, prevIsNight]);
+function Sky({ stars }) {
+  const [isNight, setIsNight] = useState(false);
 
-  useEffect(() => {
-    let animationFrame;
-    let startTime = Date.now();
-    const sunCycleDuration = 40000; // 40 seconds for sun cycle
-    const moonCycleDuration = 20000; // 20 seconds for moon cycle
-
-    const animate = () => {
-      const currentTime = Date.now();
-      const sunElapsed = currentTime - startTime;
-      const moonElapsed = currentTime - moonStartTime;
-      
-      // Sun progress (complete cycle)
-      const sunProgress = (sunElapsed % sunCycleDuration) / sunCycleDuration;
-      
-      // Moon progress (only during night)
-      const moonProgress = Math.min(moonElapsed / moonCycleDuration, 1);
-
-      // Calculate position along elliptical path for the sun
-      const angle = sunProgress * Math.PI * 2;
-      const sunX = 50 + Math.cos(angle) * 40;
-      const sunY = 50 + Math.sin(angle) * 35;
-
-      // Calculate linear arc path for the moon (left to right)
-      const moonX = moonProgress * 100; // Moves from left to right
-      const moonY = 30 - Math.sin(moonProgress * Math.PI) * 20; // Arc path
-
-      setSunPosition({ x: sunX, y: sunY });
-      setMoonPosition({ x: moonX, y: moonY });
-
-      animationFrame = requestAnimationFrame(animate);
-    };
-
-    animate();
-    return () => {
-      cancelAnimationFrame(animationFrame);
-    };
-  }, [moonStartTime]);
-
-  // Calculate if celestial bodies should be visible
-  const isSunVisible = !isNight && sunPosition.y < 50;
-  const isMoonVisible = isNight && moonPosition.x >= 0 && moonPosition.x <= 100;
+  // Fixed position in top left corner
+  const celestialPosition = {
+    x: 10,  // Changed from 50 to 10 (closer to left edge)
+    y: 15   // Changed from 25 to 15 (closer to top edge)
+  };
 
   return (
     <Box sx={{ 
@@ -63,9 +64,26 @@ function Sky({ isNight, stars }) {
       width: '100%', 
       height: '100vh',
       bgcolor: isNight ? '#1a237e' : '#87CEEB',
-      transition: 'background-color 10s linear',
+      transition: 'background-color 1s linear',
       overflow: 'hidden'
     }}>
+      {/* Toggle Switch */}
+      <Box sx={{ 
+        position: 'absolute', 
+        top: 20, 
+        right: 20, 
+        zIndex: 2,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        color: 'white'
+      }}>
+        <DayNightSwitch
+          checked={isNight}
+          onChange={(e) => setIsNight(e.target.checked)}
+        />
+      </Box>
+
       {/* Stars */}
       {isNight && stars.map((star, index) => (
         <Box
@@ -88,8 +106,8 @@ function Sky({ isNight, stars }) {
       <Box
         sx={{
           position: 'absolute',
-          left: `${sunPosition.x}%`,
-          top: `${sunPosition.y}%`,
+          left: `${celestialPosition.x}%`,
+          top: `${celestialPosition.y}%`,
           width: '50px',
           height: '50px',
           borderRadius: '50%',
@@ -98,15 +116,15 @@ function Sky({ isNight, stars }) {
           transition: 'opacity 0.5s ease-in-out',
           transform: 'scale(1)',
           zIndex: 1,
-          opacity: isSunVisible ? 1 : 0
+          opacity: !isNight ? 1 : 0
         }}
       />
       {/* Moon */}
       <Box
         sx={{
           position: 'absolute',
-          left: `${moonPosition.x}%`,
-          top: `${moonPosition.y}%`,
+          left: `${celestialPosition.x}%`,
+          top: `${celestialPosition.y}%`,
           width: '50px',
           height: '50px',
           borderRadius: '50%',
@@ -115,7 +133,7 @@ function Sky({ isNight, stars }) {
           transition: 'opacity 0.5s ease-in-out',
           transform: 'scale(0.8)',
           zIndex: 1,
-          opacity: isMoonVisible ? 1 : 0
+          opacity: isNight ? 1 : 0
         }}
       />
     </Box>
