@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Paper, Typography, Stack } from '@mui/material';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import Sky from './Sky';
+import Clouds from './Clouds';
+import TrafficLights from './TrafficLights';
+import Road from './Road';
+import Car from './Car';
+import PoliceCar from './PoliceCar';
+import RandomCars from './RandomCars';
+import { Box } from '@mui/material';
 
 function TrafficLight() {
   const [carPosition, setCarPosition] = useState(0);
@@ -11,7 +17,7 @@ function TrafficLight() {
   const [ranRedLight, setRanRedLight] = useState(false);
   const sequence = ['red', 'green', 'yellow'];
   const DURATION = 3000; // 5 seconds for each state
-  
+
   // Initialize lights with staggered states
   const [lights, setLights] = useState(() => {
     const startIndex = Math.floor(Math.random() * sequence.length);
@@ -325,256 +331,16 @@ function TrafficLight() {
   }, []);
 
   return (
-    <Box sx={{ 
-      position: 'relative', 
-      width: '100%', 
-      height: '100vh',
-      bgcolor: isNight ? '#1a237e' : '#87CEEB',
-      transition: 'background-color 10s linear'
-    }}>
-      {/* Stars */}
-      {stars.map((star, index) => (
-        <Box
-          key={index}
-          sx={{
-            position: 'absolute',
-            left: star.left,
-            top: star.top,
-            width: '2px',
-            height: '2px',
-            bgcolor: 'white',
-            borderRadius: '50%',
-            opacity: isNight ? star.opacity : 0,
-            transition: 'opacity 2s linear',
-            boxShadow: '0 0 2px white',
-          }}
-        />
-      ))}
-
-      {/* Moon/Sun */}
-      <Box
-        sx={{
-          position: 'absolute',
-          right: '10%',
-          top: '10%',
-          width: '50px',
-          height: '50px',
-          borderRadius: '50%',
-          bgcolor: isNight ? '#ffffff' : '#ffeb3b',
-          boxShadow: isNight 
-            ? '0 0 20px #ffffff80'
-            : '0 0 40px #ffeb3b',
-          transition: 'all 10s linear'
-        }}
-      />
-
-      {/* Add clouds */}
-      {clouds.map(cloud => (
-        <Box
-          key={cloud.id}
-          sx={{
-            position: 'absolute',
-            left: cloud.position,
-            top: cloud.top,
-            transition: 'left 0.05s linear',
-            width: '100px',
-            height: '40px',
-            bgcolor: 'white',
-            borderRadius: '20px',
-            boxShadow: '0 0 20px rgba(255,255,255,0.5)',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              width: '50px',
-              height: '50px',
-              bgcolor: 'white',
-              borderRadius: '25px',
-              top: '-20px',
-              left: '15px'
-            },
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              width: '40px',
-              height: '40px',
-              bgcolor: 'white',
-              borderRadius: '20px',
-              top: '-10px',
-              left: '45px'
-            }
-          }}
-        />
-      ))}
-
-      {/* Traffic lights */}
-      {[0.2, 0.5, 0.8].map((position, index) => (
-        <Box
-          key={index}
-          sx={{
-            position: 'absolute',
-            bottom: '35%',
-            left: `${position * 100}%`,
-            transform: 'translate(-50%, 0)',
-            width: '20px',
-            height: '85px',  // Increased height for yellow light
-            bgcolor: 'black',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-around',
-            alignItems: 'center',
-            padding: '5px',
-            borderRadius: '10px',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              bottom: '-50px',
-              width: '10px',
-              height: '50px',
-              bgcolor: 'black'
-            }
-          }}
-        >
-          <Box
-            sx={{
-              width: '15px',
-              height: '15px',
-              borderRadius: '50%',
-              bgcolor: lights[index].current === 'red' ? 'red' : '#1b1b1b',
-              boxShadow: lights[index].current === 'red' ? '0 0 10px red' : 'none'
-            }}
-          />
-          <Box
-            sx={{
-              width: '15px',
-              height: '15px',
-              borderRadius: '50%',
-              bgcolor: lights[index].current === 'yellow' ? 'yellow' : '#1b1b1b',
-              boxShadow: lights[index].current === 'yellow' ? '0 0 10px yellow' : 'none'
-            }}
-          />
-          <Box
-            sx={{
-              width: '15px',
-              height: '15px',
-              borderRadius: '50%',
-              bgcolor: lights[index].current === 'green' ? '#00ff00' : '#1b1b1b',
-              boxShadow: lights[index].current === 'green' ? '0 0 10px #00ff00' : 'none'
-            }}
-          />
-        </Box>
-      ))}
-
-      {/* Add grass at the bottom */}
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '15%',
-          bgcolor: '#90EE90',  // Light green color
-        }}
-      />
-
-      {/* Keep road above grass but below other elements */}
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '15%',
-          left: 0,
-          right: 0,
-          height: '100px',
-          bgcolor: 'grey.800',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: '50%',
-            left: 0,
-            right: 0,
-            height: '4px',
-            bgcolor: 'yellow',
-            borderStyle: 'dashed'
-          }
-        }}
-      />
-
-      {/* Cars */}
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '22%',
-          left: carPosition,
-          transition: 'left 0.05s linear',
-        }}
-      >
-        <DirectionsCarIcon sx={{ fontSize: 80, color: 'primary.main' }} />
-      </Box>
-
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '25%',
-          left: car2Position,
-          transition: 'left 0.05s linear',
-        }}
-      >
-        <DirectionsCarIcon sx={{ fontSize: 80, color: 'white' }} />
-      </Box>
-
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '19%',
-          left: redCarPosition,
-          transition: 'left 0.05s linear',
-        }}
-      >
-        <DirectionsCarIcon sx={{ fontSize: 80, color: 'red' }} />
-      </Box>
-
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '20%',
-          left: policePosition,
-          transition: 'left 0.02s linear',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center'
-        }}
-      >
-        {/* Add police lights */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '-15px',
-            width: '40px',
-            height: '10px',
-            bgcolor: hasCaught ? '#1a237e' : (Date.now() % 1000 < 500 ? '#ff0000' : '#0000ff'),
-            borderRadius: '5px',
-          }}
-        />
-        <DirectionsCarIcon sx={{ 
-          fontSize: 80, 
-          color: '#1a237e',  // Darker blue for police car
-          transform: 'scaleX(1.2)',  // Make it slightly wider to look more like a police car
-        }} />
-      </Box>
-
-      {/* Random cars */}
-      {randomCars.map(car => (
-        <Box
-          key={car.id}
-          sx={{
-            position: 'absolute',
-            bottom: '22%',
-            left: car.position,
-            transition: 'left 0.05s linear',
-          }}
-        >
-          <DirectionsCarIcon sx={{ fontSize: 80, color: car.color }} />
-        </Box>
-      ))}
+    <Box sx={{ position: 'relative', width: '100%', height: '100vh' }}>
+      <Sky isNight={isNight} stars={stars} />
+      <Clouds clouds={clouds} />
+      <TrafficLights lights={lights} />
+      <Road />
+      <Car position={carPosition} color="primary.main" />
+      <Car position={car2Position} color="white" bottom="25%" />
+      <Car position={redCarPosition} color="red" bottom="19%" />
+      <PoliceCar position={policePosition} hasCaught={hasCaught} redCarPosition={redCarPosition} />
+      <RandomCars randomCars={randomCars} />
     </Box>
   );
 }
