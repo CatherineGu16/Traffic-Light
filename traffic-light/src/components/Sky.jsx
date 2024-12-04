@@ -2,35 +2,60 @@ import React, { useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 
 function Sky({ isNight, stars }) {
-  const [celestialPosition, setCelestialPosition] = useState({ x: -10, y: 100 });
+  const [sunPosition, setSunPosition] = useState({ x: -10, y: 100 });
+  const [moonPosition, setMoonPosition] = useState({ x: -10, y: 100 });
+  const [prevIsNight, setPrevIsNight] = useState(isNight);
+  const [moonStartTime, setMoonStartTime] = useState(Date.now());
+
+  useEffect(() => {
+    // Reset moon animation when night begins
+    if (isNight && !prevIsNight) {
+      setMoonStartTime(Date.now());
+    }
+    setPrevIsNight(isNight);
+  }, [isNight, prevIsNight]);
 
   useEffect(() => {
     let animationFrame;
     let startTime = Date.now();
-    const animationDuration = 20000; // 20 seconds for a complete cycle
+    const sunCycleDuration = 40000; // 40 seconds for sun cycle
+    const moonCycleDuration = 20000; // 20 seconds for moon cycle
 
     const animate = () => {
       const currentTime = Date.now();
-      const elapsed = (currentTime - startTime) % animationDuration;
-      const progress = elapsed / animationDuration;
+      const sunElapsed = currentTime - startTime;
+      const moonElapsed = currentTime - moonStartTime;
+      
+      // Sun progress (complete cycle)
+      const sunProgress = (sunElapsed % sunCycleDuration) / sunCycleDuration;
+      
+      // Moon progress (only during night)
+      const moonProgress = Math.min(moonElapsed / moonCycleDuration, 1);
 
-      if (!isNight) {
-        const angle = progress * Math.PI;
-        const x = 50 - Math.cos(angle) * 60;
-        const y = 40 - Math.sin(angle) * 30;
-        setCelestialPosition({ x, y });
-      } else {
-        const x = 70 + Math.sin(progress * Math.PI * 2) * 5;
-        const y = 20 + Math.cos(progress * Math.PI * 2) * 2;
-        setCelestialPosition({ x, y });
-      }
+      // Calculate position along elliptical path for the sun
+      const angle = sunProgress * Math.PI * 2;
+      const sunX = 50 + Math.cos(angle) * 40;
+      const sunY = 50 + Math.sin(angle) * 35;
+
+      // Calculate linear arc path for the moon (left to right)
+      const moonX = moonProgress * 100; // Moves from left to right
+      const moonY = 30 - Math.sin(moonProgress * Math.PI) * 20; // Arc path
+
+      setSunPosition({ x: sunX, y: sunY });
+      setMoonPosition({ x: moonX, y: moonY });
 
       animationFrame = requestAnimationFrame(animate);
     };
 
     animate();
-    return () => cancelAnimationFrame(animationFrame);
-  }, [isNight]);
+    return () => {
+      cancelAnimationFrame(animationFrame);
+    };
+  }, [moonStartTime]);
+
+  // Calculate if celestial bodies should be visible
+  const isSunVisible = !isNight && sunPosition.y < 50;
+  const isMoonVisible = isNight && moonPosition.x >= 0 && moonPosition.x <= 100;
 
   return (
     <Box sx={{ 
@@ -59,24 +84,38 @@ function Sky({ isNight, stars }) {
           }}
         />
       ))}
-      {/* Sun/Moon */}
+      {/* Sun */}
       <Box
         sx={{
           position: 'absolute',
-          left: `${celestialPosition.x}%`,
-          top: `${celestialPosition.y}%`,
+          left: `${sunPosition.x}%`,
+          top: `${sunPosition.y}%`,
           width: '50px',
           height: '50px',
           borderRadius: '50%',
-          bgcolor: isNight ? '#ffffff' : '#ffeb3b',
-          boxShadow: isNight 
-            ? '0 0 20px #ffffff80'
-            : '0 0 40px #ffeb3b',
-          transition: 'background-color 10s linear, box-shadow 10s linear',
-          transform: `scale(${isNight ? 0.8 : 1})`,
+          bgcolor: '#ffeb3b',
+          boxShadow: '0 0 40px #ffeb3b',
+          transition: 'opacity 0.5s ease-in-out',
+          transform: 'scale(1)',
           zIndex: 1,
-          opacity: celestialPosition.y > 85 ? 
-            Math.max(0, 1 - (celestialPosition.y - 85) / 5) : 1
+          opacity: isSunVisible ? 1 : 0
+        }}
+      />
+      {/* Moon */}
+      <Box
+        sx={{
+          position: 'absolute',
+          left: `${moonPosition.x}%`,
+          top: `${moonPosition.y}%`,
+          width: '50px',
+          height: '50px',
+          borderRadius: '50%',
+          bgcolor: '#ffffff',
+          boxShadow: '0 0 20px #ffffff80',
+          transition: 'opacity 0.5s ease-in-out',
+          transform: 'scale(0.8)',
+          zIndex: 1,
+          opacity: isMoonVisible ? 1 : 0
         }}
       />
     </Box>
